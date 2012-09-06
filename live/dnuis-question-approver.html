@@ -234,11 +234,14 @@ html,body {
 							$('.pendingQuestions').append("<p>"+value.value()+"</p>");
 							
 							var split=value.value().split("&");
+							$('.pendingQuestions').append("<p>Only Url: "+split[0]+"</p>");
 							
-							client.append({
-								node: client.reference(split[0]),
-								to: questions
-							});
+							if (split[0]) {
+								client.append({
+									node: client.reference(split[0]),
+									to: questions
+								});
+							}
 						}
 					});
 					
