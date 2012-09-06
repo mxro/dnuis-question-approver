@@ -218,7 +218,7 @@ html,body {
 						to: res.root
 					});
 					
-					var questions = client.append({
+					/*var questions = client.append({
 						node: "questions",
 						to: repo,
 						atAddress: "./questions"
@@ -227,7 +227,7 @@ html,body {
 					client.append({
 						node: aQuestionBag,
 						to: questions
-					});
+					});*/
 					
 					$.each(sr.values, function(index, value) {
 						if (value.value) {
@@ -239,7 +239,7 @@ html,body {
 							if (split[0]) {
 								client.append({
 									node: client.reference(split[0]),
-									to: questions
+									to: res.root
 								});
 							}
 						}
@@ -249,7 +249,7 @@ html,body {
 					
 					client.commit({
 						onSuccess: function() {
-							$('.pendingQuestions').append("<p>All uploaded to: "+res.root+" "+res.secret+"</p>");
+							$('.pendingQuestions').append("<p>All uploaded to: "+res.root.url()+" "+res.secret+"</p>");
 						}
 						
 					});
