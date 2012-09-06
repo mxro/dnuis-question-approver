@@ -211,7 +211,7 @@ html,body {
 		
 		var uploadQuestions = function(sr) {
 			client.seed({
-				onSucess: function(res) {
+				onSuccess: function(res) {
 					
 					var repo = client.append({
 						node: aQuestionBagRepository,
@@ -242,9 +242,12 @@ html,body {
 						}
 					});
 					
-					client.commit({onSuccess: function() {
-						$('.pendingQuestions').append("<p>All uploaded to: "+res.root+"</p>");
-					}
+					$('.pendingQuestions').append("<p>Uploading ...</p>");
+					
+					client.commit({
+						onSuccess: function() {
+							$('.pendingQuestions').append("<p>All uploaded to: "+res.root+" "+res.secret+"</p>");
+						}
 						
 					});
 					
