@@ -12,8 +12,10 @@
 		var questionsForReviewSecret = "thd3pb41jrke83i";
 
 		
-		var renderers = AJ.odb.rendering().createDefaultRendererRegistry();
-
+		var renderers = AJ.odb.rendering().createCompleteRendererRegistry(function(input) {
+			return input;
+			
+		});
 		//var converter = new Markdown.Converter();
 
 		//renderers.addRenderer(AJ.odb.rendering().createMarkdownRenderer(
@@ -157,7 +159,7 @@
 								onSuccess : function(html) {
 									var formElem = toElem.append("<div></div>");
 
-									formElem.html(html);
+									formElem.html("FORM:"+html);
 
 									var questionForm = $.initStrategyQuestionForm({
 										elem : $('.questionForm', formElem)
