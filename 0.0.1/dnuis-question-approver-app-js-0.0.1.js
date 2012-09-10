@@ -92,12 +92,15 @@
 
 		qa.priv.loadQuestions = function() {
 			AJ.ui.showProgressBar();
+			AJ.ui.showStatus("Loading submitted questions node.");
 			client
 					.load({
 						node : questionsForReviewNode,
 						secret : questionsForReviewSecret,
 						onSuccess : function(res) {
-
+							
+							AJ.ui.showStatus("Downloading submitted children.");
+							
 							client
 									.select({
 										from : res.loadedNode,
@@ -132,7 +135,9 @@
 																				elem)
 																				.append(
 																						newRow);
-
+																		
+																		AJ.ui.showStatus("Rendering question from for: "+address);
+																		
 																		qa.priv
 																				.appendQuestionForm(
 																						$(
@@ -143,7 +148,8 @@
 																						secret,
 																						function(
 																								questionForm) {
-
+																							
+																							AJ.ui.showStatus("Loading question data for: "+address);
 																							sqdata
 																									.loadQuestion(
 																											client
@@ -151,9 +157,10 @@
 																											secret,
 																											function(
 																													questionData) {
+																												AJ.ui.showStatus("Question loaded successfully: "+address);
 																												questionForm
 																														.loadQuestion(questionData);
-
+																												
 																												newRow
 																														.show();
 																												AJ.ui
