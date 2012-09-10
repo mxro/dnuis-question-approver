@@ -93,7 +93,7 @@
 		qa.priv = {};
 
 		qa.priv.loadQuestions = function() {
-			AJ.ui.showProgressBar();
+			
 			AJ.ui.showStatus("Loading submitted questions node.");
 			client.load({
 				node : questionsForReviewNode,
@@ -130,7 +130,8 @@
 			}
 
 			var split = value.value().split("&");
-
+			
+			AJ.ui.showProgressBar();
 			if (split[0] && split[1]) {
 				var address = split[0];
 				var secret = split[1];
@@ -312,6 +313,7 @@
 						node : questionNode,
 						to : res.loadedNode,
 						onSuccess : function(res) {
+							qa.priv.removeQuestionFromQueue(questionNode, secret);
 							onSuccess();
 						}
 					});
