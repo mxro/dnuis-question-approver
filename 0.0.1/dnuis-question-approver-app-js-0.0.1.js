@@ -30,7 +30,7 @@
 		var questionFormTemplate = client
 				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approve-strategy-question-form-html-0.0.1");
 
-		var questionRepositorySecret = "thd3pb41jrke83i";
+		var questionRepositorySecret = "thd3pb41jrke83i"; // wrong
 
 		var qa = {};
 
@@ -39,7 +39,8 @@
 
 		qa.approvalFormTermplate = null;
 
-		qa.uploadQuestions = function(resolvedQuestionNodes) {
+		
+		qa.createRepositoryAndBag = function(resolvedQuestionNodes) {
 			client.seed({
 				onSuccess : function(res) {
 
@@ -61,13 +62,14 @@
 						to : questions
 					});
 
-					$('.pendingQuestions').append("<p>Uploading ...</p>");
+					
 
 					client.commit({
 						onSuccess : function() {
 							$('.pendingQuestions').append(
-									"<p>All uploaded to: " + repo.url() + " "
-											+ res.secret + "</p>");
+									"<p>Repository created: " + repo.url() + " "
+											+ res.secret + "</p>"+
+											"Question bag created: "+questions.url());
 						}
 
 					});
@@ -220,6 +222,14 @@
 		qa.priv.appendQuestionForm = function(toElem, row, address, secret,
 				onSuccess) {
 
+			if (!address) {
+				throw "Address must be defined";
+			}
+			
+			if (!secret) {
+				throw "Secret must be defined";
+			}
+			
 			qa.priv.getApprovalFormTemplate(function(html) {
 				var formElem = $("<div></div>");
 				toElem.append(formElem);
@@ -335,7 +345,7 @@
 		})();
 
 		return {
-
+			createRepositoryAndBag : qa.createRepositoryAndBag
 		};
 	};
 
