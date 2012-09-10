@@ -11,19 +11,23 @@
 				.reference("http://slicnet.com/questio/questio");
 		var questionsForReviewSecret = "thd3pb41jrke83i";
 
-		
-		var renderers = AJ.odb.rendering().createCompleteRendererRegistry(function(input) {
-			return input;
-			
+		var sqdata = $.initStrategyQuestionData({
+			client : client
 		});
-		//var converter = new Markdown.Converter();
 
-		//renderers.addRenderer(AJ.odb.rendering().createMarkdownRenderer(
-		//		function(input) {
-		//			return converter.makeHtml(input);
-		//		}));
-		//var renderers = 
-		
+		var renderers = AJ.odb.rendering().createCompleteRendererRegistry(
+				function(input) {
+					return input;
+
+				});
+		// var converter = new Markdown.Converter();
+
+		// renderers.addRenderer(AJ.odb.rendering().createMarkdownRenderer(
+		// function(input) {
+		// return converter.makeHtml(input);
+		// }));
+		// var renderers =
+
 		// constants
 		var aQuestionBag = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag");
@@ -128,9 +132,25 @@
 																						"<tr><td>1</td><td class='approvalForm'></td>");
 
 																		qa.priv
-																				.appendQuestionForm($(
-																						'.approvalForm',
-																						newRow));
+																				.appendQuestionForm(
+																						$(
+																								'.approvalForm',
+																								newRow),
+																						function(
+																								questionForm) {
+
+																							sqdata
+																									.loadQuestion(
+																											client
+																													.reference(address),
+																											secret,
+																											function(
+																													questionData) {
+																													questionForm.loadQuestion(questionData);
+																											});
+																							
+
+																						});
 
 																	}
 																}
@@ -143,47 +163,42 @@
 					});
 		};
 
-		qa.priv.appendQuestionForm = function(toElem) {
+		qa.priv.appendQuestionForm = function(toElem, onSuccess) {
 
 			client.load({
 				node : questionFormTemplate,
 				onSuccess : function(res) {
 
-					AJ.odb
-					.rendering()
-					.render(
-							{
-								node : res.loadedNode,
-								registry : renderers,
-								client : client,
-								onSuccess : function(html) {
-									var formElem = toElem.append("<div></div>");
+					AJ.odb.rendering().render({
+						node : res.loadedNode,
+						registry : renderers,
+						client : client,
+						onSuccess : function(html) {
+							var formElem = toElem.append("<div></div>");
 
-									formElem.html("FORM:"+html);
+							formElem.html( html);
 
-									var questionForm = $.initStrategyQuestionForm({
-										elem : $('.questionForm', formElem)
-									});
-
-									$('.approveButton', formElem).click(function(evt) {
-										evt.preventDefault();
-										formElem.remove();
-									});
-
-									$('.rejectButton', formElem).click(function(evt) {
-										evt.preventDefault();
-										formElem.remove();
-									});
-								}
+							var questionForm = $.initStrategyQuestionForm({
+								elem : $('.questionForm', formElem)
 							});
-					
-					//var html = client.dereference({
-					//	ref : res.loadedNode
-					//}).value();
 
-					
-					
-					
+							$('.approveButton', formElem).click(function(evt) {
+								evt.preventDefault();
+								formElem.remove();
+							});
+
+							$('.rejectButton', formElem).click(function(evt) {
+								evt.preventDefault();
+								formElem.remove();
+							});
+
+							onSuccess(questionForm);
+						}
+					});
+
+					// var html = client.dereference({
+					// ref : res.loadedNode
+					// }).value();
 
 				}
 			});
@@ -193,9 +208,9 @@
 		// init ui
 		(function() {
 			qa.updateDestination();
-			
+
 			qa.priv.loadQuestions();
-			
+
 			elem.show()
 		})();
 
