@@ -119,10 +119,12 @@
 																		var address = split[0];
 																		var secret = split[1];
 
-																		var newRow = $("<tr class='hide'><td>"+num+"</td><td class='approvalForm'></td></tr>");
-																			
-																		num = num+1;
-																		
+																		var newRow = $("<tr class='hide'><td>"
+																				+ num
+																				+ "</td><td class='approvalForm'></td></tr>");
+
+																		num = num + 1;
+
 																		$(
 																				'.incomingQuestions',
 																				elem)
@@ -134,7 +136,9 @@
 																						$(
 																								'.approvalForm',
 																								newRow),
-																								address, secret,
+																						newRow,
+																						address,
+																						secret,
 																						function(
 																								questionForm) {
 
@@ -145,12 +149,14 @@
 																											secret,
 																											function(
 																													questionData) {
-																													questionForm.loadQuestion(questionData);
-																													
-																													newRow.show();
-																													AJ.ui.hideProgressBar();
+																												questionForm
+																														.loadQuestion(questionData);
+
+																												newRow
+																														.show();
+																												AJ.ui
+																														.hideProgressBar();
 																											});
-																							
 
 																						});
 
@@ -165,42 +171,48 @@
 					});
 		};
 
-		qa.priv.appendQuestionForm = function(toElem, address, secret, onSuccess) {
+		qa.priv.appendQuestionForm = function(toElem, row, address, secret,
+				onSuccess) {
 
 			client.load({
 				node : questionFormTemplate,
 				onSuccess : function(res) {
 
-					AJ.odb.rendering().render({
-						node : res.loadedNode,
-						registry : renderers,
-						client : client,
-						onSuccess : function(html) {
-							var formElem = $("<div></div>");
-							toElem.append(formElem);
+					AJ.odb.rendering().render(
+							{
+								node : res.loadedNode,
+								registry : renderers,
+								client : client,
+								onSuccess : function(html) {
+									var formElem = $("<div></div>");
+									toElem.append(formElem);
 
-							formElem.html( html);
+									formElem.html(html);
 
-							var questionForm = $.initStrategyQuestionForm({
-								elem : $('.questionForm', formElem)
+									var questionForm = $
+											.initStrategyQuestionForm({
+												elem : $('.questionForm',
+														formElem)
+											});
+
+									$('.approveButton', formElem).click(
+											function(evt) {
+												evt.preventDefault();
+												row.remove();
+											});
+
+									$('.rejectButton', formElem).click(
+											function(evt) {
+												evt.preventDefault();
+												qa.priv.rejectQuestion(client
+														.reference(address),
+														secret);
+												row.remove();
+											});
+
+									onSuccess(questionForm);
+								}
 							});
-
-							$('.approveButton', formElem).click(function(evt) {
-								evt.preventDefault();
-								toElem.remove();
-							});
-
-							$('.rejectButton', formElem).click(function(evt) {
-								evt.preventDefault();
-								qa.priv.rejectQuestion(client.reference(address), secret);
-								toElem.remove();
-							});
-
-							onSuccess(questionForm);
-						}
-					});
-
-					
 
 				}
 			});
@@ -208,35 +220,36 @@
 		};
 
 		qa.priv.removeQuestionFromQueue = function(questionNode, secret) {
-			client
-			.select({
+			client.select({
 				from : questionsForReviewNode,
 				onSuccess : function(sr) {
 					$.each(sr.values, function(index, node) {
-						if (node.value() === questionNode.url() + "&"+secret) {
+						if (node.value
+								&& typeof node.value === 'function'
+								&& node.value() === questionNode.url() + "&"
+										+ secret) {
 							alert("remove question");
 							client.remove({
-								node: node,
-								from: questionsForReviewNode
+								node : node,
+								from : questionsForReviewNode
 							});
-							
+
 							client.commit({
-								onSuccess: function() {
+								onSuccess : function() {
 									alert("question removed!");
 								}
 							});
 						}
 					});
-					}
-					
-					
-				});
+				}
+
+			});
 		}
-		
+
 		qa.priv.rejectQuestion = function(node, secret) {
 			qa.priv.removeQuestionFromQueue(node, secret);
 		};
-		
+
 		// init ui
 		(function() {
 			qa.updateDestination();
