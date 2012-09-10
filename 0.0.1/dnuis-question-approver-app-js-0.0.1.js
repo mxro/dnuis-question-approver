@@ -133,6 +133,7 @@
 																						$(
 																								'.approvalForm',
 																								newRow),
+																								address, secret,
 																						function(
 																								questionForm) {
 
@@ -161,7 +162,7 @@
 					});
 		};
 
-		qa.priv.appendQuestionForm = function(toElem, onSuccess) {
+		qa.priv.appendQuestionForm = function(toElem, address, secret, onSuccess) {
 
 			client.load({
 				node : questionFormTemplate,
@@ -188,6 +189,7 @@
 
 							$('.rejectButton', formElem).click(function(evt) {
 								evt.preventDefault();
+								qa.priv.rejectQuestion(client.reference(address), secret);
 								toElem.remove();
 							});
 
@@ -204,6 +206,29 @@
 
 		};
 
+		qa.priv.removeQuestionFromQueue = function(node, secret) {
+			client
+			.select({
+				from : questionsForReviewNode,
+				onSuccess : function(sr) {
+					$.each(sr.values, function(index, node) {
+						if (node.value === node.url() + "&"+secret) {
+							client.remove({
+								node: node,
+								from: questionsForReviewNode
+							});
+						}
+					});
+					}
+					
+					
+				});
+		}
+		
+		qa.priv.rejectQuestion = function(node, secret) {
+			qa.priv.removeQuestionFromQueue(node, secret);
+		};
+		
 		// init ui
 		(function() {
 			qa.updateDestination();
