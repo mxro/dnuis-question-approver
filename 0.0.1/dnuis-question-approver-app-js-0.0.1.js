@@ -20,13 +20,6 @@
 					return input;
 
 				});
-		// var converter = new Markdown.Converter();
-
-		// renderers.addRenderer(AJ.odb.rendering().createMarkdownRenderer(
-		// function(input) {
-		// return converter.makeHtml(input);
-		// }));
-		// var renderers =
 
 		// constants
 		var aQuestionBag = client
@@ -125,9 +118,11 @@
 																		var address = split[0];
 																		var secret = split[1];
 
-																		var newRow = $("<tr><td>1</td><td class='approvalForm'></td>");
+																		var newRow = $("<tr class='hide'><td>"+num+"</td><td class='approvalForm'></td></tr>");
 																			
-																			$(
+																		num = num+1;
+																		
+																		$(
 																				'.incomingQuestions',
 																				elem)
 																				.append(
@@ -149,6 +144,7 @@
 																											function(
 																													questionData) {
 																													questionForm.loadQuestion(questionData);
+																													newRow.show();
 																											});
 																							
 
@@ -187,12 +183,12 @@
 
 							$('.approveButton', formElem).click(function(evt) {
 								evt.preventDefault();
-								formElem.remove();
+								toElem.remove();
 							});
 
 							$('.rejectButton', formElem).click(function(evt) {
 								evt.preventDefault();
-								formElem.remove();
+								toElem.remove();
 							});
 
 							onSuccess(questionForm);
