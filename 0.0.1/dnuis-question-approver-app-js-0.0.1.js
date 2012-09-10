@@ -125,11 +125,13 @@
 																		var address = split[0];
 																		var secret = split[1];
 
-																		var newRow = $(
+																		var newRow = $("<tr><td>1</td><td class='approvalForm'></td>");
+																			
+																			$(
 																				'.incomingQuestions',
 																				elem)
 																				.append(
-																						"<tr><td>1</td><td class='approvalForm'></td>");
+																						newRow);
 
 																		qa.priv
 																				.appendQuestionForm(
@@ -174,7 +176,8 @@
 						registry : renderers,
 						client : client,
 						onSuccess : function(html) {
-							var formElem = toElem.append("<div></div>");
+							var formElem = $("<div></div>");
+							toElem.append(formElem);
 
 							formElem.html( html);
 
