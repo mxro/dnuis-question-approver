@@ -11,6 +11,17 @@
 				.reference("http://slicnet.com/questio/questio");
 		var questionsForReviewSecret = "thd3pb41jrke83i";
 
+		
+		var renderers = AJ.odb.rendering().createDefaultRendererRegistry();
+
+		//var converter = new Markdown.Converter();
+
+		//renderers.addRenderer(AJ.odb.rendering().createMarkdownRenderer(
+		//		function(input) {
+		//			return converter.makeHtml(input);
+		//		}));
+		//var renderers = 
+		
 		// constants
 		var aQuestionBag = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag");
@@ -136,27 +147,41 @@
 				node : questionFormTemplate,
 				onSuccess : function(res) {
 
-					var html = client.dereference({
-						ref : res.loadedNode
-					}).value();
+					AJ.odb
+					.rendering()
+					.render(
+							{
+								node : res.loadedNode,
+								registry : renderers,
+								client : client,
+								onSuccess : function(html) {
+									var formElem = toElem.append("<div></div>");
 
-					var formElem = toElem.append("<div></div>");
+									formElem.html(html);
 
-					formElem.html(html);
+									var questionForm = $.initStrategyQuestionForm({
+										elem : $('.questionForm', formElem)
+									});
 
-					var questionForm = $.initStrategyQuestionForm({
-						elem : $('.questionForm', formElem)
-					});
+									$('.approveButton', formElem).click(function(evt) {
+										evt.preventDefault();
+										formElem.remove();
+									});
 
-					$('.approveButton', formElem).click(function(evt) {
-						evt.preventDefault();
-						formElem.remove();
-					});
+									$('.rejectButton', formElem).click(function(evt) {
+										evt.preventDefault();
+										formElem.remove();
+									});
+								}
+							});
+					
+					//var html = client.dereference({
+					//	ref : res.loadedNode
+					//}).value();
 
-					$('.rejectButton', formElem).click(function(evt) {
-						evt.preventDefault();
-						formElem.remove();
-					});
+					
+					
+					
 
 				}
 			});
