@@ -5,9 +5,9 @@
 		<div class="control-group">
 			<label class="control-label" for="repoSel">Repository</label>
 			<div class="controls controls-row">
-				<select class="span5" id="repoSel" >
-					<option>Development Repository</option>
-					<option>Release Repository</option>
+				<select class="repositorySelect span5" id="repoSel" >
+					<option value="http://slicnet.com/seed1/seed1/9/1/h/sd">Development Repository</option>
+					<option value="release">Release Repository</option>
 				</select> <input class="hide btn btn-info btn-small" type="button"
 					value="+ New Repository">
 
@@ -16,12 +16,9 @@
 		<div class="control-group">
 			<label class="control-label" for="bagSel">Question Bag</label>
 			<div class="controls controls-row">
-				<select id="bagSel" class="span5">
-					<option>Main Bag</option>
-					<option>Bag 2</option>
-					<option>Bag 3</option>
-					<option>Bag 4</option>
-					<option>Bag 5</option>
+				<select  class="questionBagSelect span5" id="bagSel">
+					<option value="http://slicnet.com/seed1/seed1/9/1/h/sd/questions">Main Bag</option>
+					<!-- <option>Secondary Bag</option> -->
 				</select> <input class="hide btn btn-info btn-small" type="button"
 					value="+ New Bag">
 			</div>
@@ -42,13 +39,13 @@
 		<p>Approved questions will be added to the question bag:</p>
 		<blockquote>
 			<p>
-				<a href="#">http://bag.com</a>
+				<a class="destRepoLabel" href="#">http://bag.com</a>
 			</p>
 		</blockquote>
 		<p>In the question bag repository:</p>
 		<blockquote>
 			<p>
-				<a href="#">http://bag.com</a>
+				<a class="questionBagLabel" href="#">http://bag.com</a>
 			</p>
 		</blockquote>
 		<small>These links are required by apps to use the approved

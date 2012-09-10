@@ -115,7 +115,7 @@ html,body {
 
 			
 
-			<div id="questionapprover">
+			<div id="questionapprover" class="hide">
 				<!-- one.embedText("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/dnuis-question-approver-app-html-0.0.1") -->
 			</div>
 
@@ -220,86 +220,8 @@ html,body {
 	
 	function AJ_loginCompleted(aj, userLoggedIn) {
 
-		var client = aj.createClient();
 		
-		var aQuestionBag = client.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag");
-		var aQuestionBagRepository = client.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag_Repository");
-		
-		var questionsForReviewNode = client.reference("http://slicnet.com/questio/questio");
-		var questionsForReviewSecret = "thd3pb41jrke83i";
-		
-		
-		var uploadQuestions = function(sr) {
-			client.seed({
-				onSuccess: function(res) {
-					
-					var repo = res.root;
-					
-					client.append({
-						node: aQuestionBagRepository,
-						to: repo
-					});
-					
-					var questions = client.append({
-						node: "questions",
-						to: repo,
-						atAddress: "./questions"
-					});
-					
-					client.append({
-						node: aQuestionBag,
-						to: questions
-					});
-					
-					$.each(sr.values, function(index, value) {
-						if (value.value) {
-							$('.pendingQuestions').append("<p>"+value.value()+"</p>");
-							
-							var split=value.value().split("&");
-							$('.pendingQuestions').append("<p>Only Url: "+split[0]+"</p>");
-							
-							if (split[0]) {
-								client.append({
-									node: client.reference(split[0]),
-									to: questions
-								});
-							}
-						}
-					});
-					
-					$('.pendingQuestions').append("<p>Uploading ...</p>");
-					
-					client.commit({
-						onSuccess: function() {
-							$('.pendingQuestions').append("<p>All uploaded to: "+repo.url()+" "+res.secret+"</p>");
-						}
-						
-					});
-					
-				}
-			});
-			
-			
-		}
-		
-		client.load({
-			node: questionsForReviewNode,
-			secret: questionsForReviewSecret,
-			onSuccess: function(res) {
-				
-				client.select({
-					from: res.loadedNode,
-					onSuccess: function(sr) {
-						
-						uploadQuestions(sr);
-						
-					}
-				});
-				
-			}
-		});
-		
-		
+
 		
 	}
 
@@ -309,6 +231,13 @@ html,body {
 		AJ.notificationBar = $.ajInitNotificationBar($("#ajnotificationbar"), aj);
 		AJ.navbar = $.ajInitNavbar($("#ajnavbar"), aj);
 		AJ.progressBar=$.ajInitProgressBar($("#ajprogressbar"));
+		
+		var client = aj.createClient();
+		
+		var questionapprover = $.initQuestionApprover({
+			elem: $('#questionapprover'),
+			client: client
+		});
 		
 	}
 
