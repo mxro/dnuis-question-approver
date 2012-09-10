@@ -39,7 +39,6 @@
 
 		qa.approvalFormTermplate = null;
 
-		
 		qa.createRepositoryAndBag = function(resolvedQuestionNodes) {
 			client.seed({
 				onSuccess : function(res) {
@@ -62,14 +61,13 @@
 						to : questions
 					});
 
-					
-
 					client.commit({
 						onSuccess : function() {
 							$('.pendingQuestions').append(
-									"<p>Repository created: " + repo.url() + " "
-											+ res.secret + "</p>"+
-											"Question bag created: "+questions.url());
+									"<p>Repository created: " + repo.url()
+											+ " " + res.secret + "</p>"
+											+ "Question bag created: "
+											+ questions.url());
 						}
 
 					});
@@ -97,116 +95,101 @@
 		qa.priv.loadQuestions = function() {
 			AJ.ui.showProgressBar();
 			AJ.ui.showStatus("Loading submitted questions node.");
-			client
-					.load({
-						node : questionsForReviewNode,
-						secret : questionsForReviewSecret,
-						onSuccess : function(res) {
+			client.load({
+				node : questionsForReviewNode,
+				secret : questionsForReviewSecret,
+				onSuccess : function(res) {
 
-							AJ.ui.showStatus("Downloading submitted children.");
+					AJ.ui.showStatus("Downloading submitted children.");
 
-							client
-									.select({
-										from : res.loadedNode,
-										onSuccess : function(sr) {
+					client.select({
+						from : res.loadedNode,
+						onSuccess : function(sr) {
 
-											qa.priv.renderQuestions(o, sr.values);
-
-										}
-									});
+							qa.priv.renderQuestions(0, 1, sr.values);
 
 						}
 					});
+
+				}
+			});
 		};
 
-		qa.priv.renderQuestions = function(idx, questions) {
-			
+		qa.priv.renderQuestions = function(idx, num, questions) {
+
 			if (idx >= questions.length) {
 				return;
 			}
-			
-			var value=questions[idx];
-			var num=idx+1;
-			
-			if (value.value) {
 
-				var split = value
-						.value()
-						.split(
-								"&");
+			var value = questions[idx];
+			var num = idx + 1;
 
-				if (split[0]
-						&& split[1]) {
-					var address = split[0];
-					var secret = split[1];
-
-					var newRow = $("<tr class='hide'><td>"
-							+ num
-							+ "</td><td class='approvalForm'></td></tr>");
-
-					num = num + 1;
-
-					$(
-							'.incomingQuestions',
-							elem)
-							.append(
-									newRow);
-
-					AJ.ui
-							.showStatus("Rendering question from for: "
-									+ address);
-
-					qa.priv
-							.appendQuestionForm(
-									$(
-											'.approvalForm',
-											newRow),
-									newRow,
-									address,
-									secret,
-									function(
-											questionForm) {
-
-										AJ.ui
-												.showStatus("Loading question data for: "
-														+ address);
-										sqdata
-												.loadQuestion(
-														client
-																.reference(address),
-														secret,
-														function(
-																questionData) {
-															AJ.ui
-																	.showStatus("Question loaded successfully: "
-																			+ address);
-															questionForm
-																	.loadQuestion(questionData);
-
-															newRow
-																	.show();
-															AJ.ui
-																	.hideProgressBar();
-															AJ.ui
-																	.showStatus("Question completely rendered: "
-																			+ address);
-															qa.priv.renderQuestions(idx+1, questions);
-														});
-
-									});
-
-				}
+			if (!value.value) {
+				qa.priv.renderQuestions(idx + 1, num, questions);
+				return;
 			}
-			
+
+			var split = value.value().split("&");
+
+			if (split[0] && split[1]) {
+				var address = split[0];
+				var secret = split[1];
+
+				var newRow = $("<tr class='hide'><td>" + num
+						+ "</td><td class='approvalForm'></td></tr>");
+
+				num = num + 1;
+
+				$('.incomingQuestions', elem).append(newRow);
+
+				AJ.ui.showStatus("Rendering question from for: " + address);
+
+				qa.priv
+						.appendQuestionForm(
+								$('.approvalForm', newRow),
+								newRow,
+								address,
+								secret,
+								function(questionForm) {
+
+									AJ.ui
+											.showStatus("Loading question data for: "
+													+ address);
+									sqdata
+											.loadQuestion(
+													client.reference(address),
+													secret,
+													function(questionData) {
+														AJ.ui
+																.showStatus("Question loaded successfully: "
+																		+ address);
+														questionForm
+																.loadQuestion(questionData);
+
+														newRow.show();
+														AJ.ui.hideProgressBar();
+														AJ.ui
+																.showStatus("Question completely rendered: "
+																		+ address);
+														qa.priv
+																.renderQuestions(
+																		idx + 1,
+																		num+1,
+																		questions);
+													});
+
+								});
+
+			}
+
 		}
-		
+
 		qa.priv.getApprovalFormTemplate = function(onSuccess) {
 			if (qa.approvalFormTermplate) {
 				onSuccess(qa.approvalFormTermplate);
 				return;
 			}
 
-			
 			client.load({
 				node : questionFormTemplate,
 				onSuccess : function(res) {
@@ -232,40 +215,49 @@
 			if (!address) {
 				throw "Address must be defined";
 			}
-			
+
 			if (!secret) {
 				throw "Secret must be defined";
 			}
-			
-			qa.priv.getApprovalFormTemplate(function(html) {
-				var formElem = $("<div></div>");
-				toElem.append(formElem);
 
-				formElem.html(html);
+			qa.priv
+					.getApprovalFormTemplate(function(html) {
+						var formElem = $("<div></div>");
+						toElem.append(formElem);
 
-				var questionForm = $.initStrategyQuestionForm({
-					elem : $('.questionForm', formElem)
-				});
+						formElem.html(html);
 
-				$('.approveButton', formElem).click(
-						function(evt) {
-							evt.preventDefault();
-							qa.priv.approveQuestion(client.reference(address),
-									secret, function() {
-										row.html("<div style='margin-left: 35px;'><i class='icon-okay'></i> Approved!</div>");
-										row.show();
-									});
-							row.hide();
+						var questionForm = $.initStrategyQuestionForm({
+							elem : $('.questionForm', formElem)
 						});
 
-				$('.rejectButton', formElem).click(function(evt) {
-					evt.preventDefault();
-					qa.priv.rejectQuestion(client.reference(address), secret);
-					row.remove();
-				});
+						$('.approveButton', formElem)
+								.click(
+										function(evt) {
+											evt.preventDefault();
+											qa.priv
+													.approveQuestion(
+															client
+																	.reference(address),
+															secret,
+															function() {
+																row
+																		.html("<div style='margin-left: 35px;'><i class='icon-okay'></i> Approved!</div>");
+																row.show();
+															});
+											row.hide();
+										});
 
-				onSuccess(questionForm);
-			});
+						$('.rejectButton', formElem).click(
+								function(evt) {
+									evt.preventDefault();
+									qa.priv.rejectQuestion(client
+											.reference(address), secret);
+									row.remove();
+								});
+
+						onSuccess(questionForm);
+					});
 
 		};
 
@@ -302,31 +294,31 @@
 			if (!qa.selectedQuestionBag) {
 				throw "Cannot approve questions if no question bag is selected.";
 			}
-			
+
 			if (!questionNode) {
 				throw "Question node must be defined!";
 			}
-			
+
 			client.load({
 				node : client.reference(qa.selectedQuestionBag),
 				secret : questionRepositorySecret,
 				onSuccess : function(res) {
-					
+
 					if (!res.loadedNode) {
 						throw "Loaded node not defined.";
 					}
-					
+
 					client.appendSafe({
 						node : questionNode,
 						to : res.loadedNode,
-						onSuccess: function(res) {
+						onSuccess : function(res) {
 							onSuccess();
 						}
-					}); 
+					});
 
 					client.commit({
 						onSuccess : function() {
-							
+
 						}
 					});
 				},
