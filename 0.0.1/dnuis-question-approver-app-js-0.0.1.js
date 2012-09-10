@@ -197,6 +197,7 @@
 				return;
 			}
 
+			
 			client.load({
 				node : questionFormTemplate,
 				onSuccess : function(res) {
@@ -234,7 +235,7 @@
 							evt.preventDefault();
 							qa.priv.approveQuestion(client.reference(address),
 									secret, function() {
-										row.html("<i class='icon-okay'></i> Approved!");
+										row.html("<div style='margin-left: 35px;'><i class='icon-okay'></i> Approved!</div>");
 										row.show();
 									});
 							row.hide();
@@ -278,21 +279,37 @@
 			});
 		}
 
-		qa.priv.approveQuestion = function(node, secret, onSuccess) {
+		qa.priv.approveQuestion = function(questionNode, secret, onSuccess) {
 			qa.updateDestination();
 
+			if (!qa.selectedQuestionBag) {
+				throw "Cannot approve questions if no question bag is selected.";
+			}
+			
+			if (!questionNode) {
+				throw "Question node must be defined!";
+			}
+			
 			client.load({
 				node : client.reference(qa.selectedQuestionBag),
 				secret : questionRepositorySecret,
 				onSuccess : function(res) {
-					client.append({
-						node : node,
-						to : res.loadedNode
-					});
+					
+					if (!res.loadedNode) {
+						throw "Loaded node not defined.";
+					}
+					
+					client.appendSafe({
+						node : questionNode,
+						to : res.loadedNode,
+						onSuccess: function(res) {
+							onSuccess();
+						}
+					}); 
 
 					client.commit({
 						onSuccess : function() {
-							onSuccess();
+							
 						}
 					});
 				},
