@@ -35,6 +35,8 @@
 		qa.selectedRepo = null;
 		qa.selectedQuestionBag = null;
 
+		qa.approvalFormTermplate = null;
+		
 		qa.uploadQuestions = function(resolvedQuestionNodes) {
 			client.seed({
 				onSuccess : function(res) {
@@ -171,9 +173,12 @@
 					});
 		};
 
-		qa.priv.appendQuestionForm = function(toElem, row, address, secret,
-				onSuccess) {
-
+		qa.priv.getApprovalFormTemplate = function(onSuccess) {
+			if (qa.approvalFormTermplate) {
+				onSuccess(qa.approvalFormTermplate);
+				return;
+			}
+			
 			client.load({
 				node : questionFormTemplate,
 				onSuccess : function(res) {
@@ -184,38 +189,51 @@
 								registry : renderers,
 								client : client,
 								onSuccess : function(html) {
-									var formElem = $("<div></div>");
-									toElem.append(formElem);
-
-									formElem.html(html);
-
-									var questionForm = $
-											.initStrategyQuestionForm({
-												elem : $('.questionForm',
-														formElem)
-											});
-
-									$('.approveButton', formElem).click(
-											function(evt) {
-												evt.preventDefault();
-												row.remove();
-											});
-
-									$('.rejectButton', formElem).click(
-											function(evt) {
-												evt.preventDefault();
-												qa.priv.rejectQuestion(client
-														.reference(address),
-														secret);
-												row.remove();
-											});
-
-									onSuccess(questionForm);
+									qa.approvalFormTermplate = html;
+									onSuccess(html);
 								}
 							});
 
 				}
 			});
+			
+			
+		};
+		
+		qa.priv.appendQuestionForm = function(toElem, row, address, secret,
+				onSuccess) {
+
+			qa.priv.getApprovalFormTemplate(function(html) {
+				var formElem = $("<div></div>");
+				toElem.append(formElem);
+
+				formElem.html(html);
+
+				var questionForm = $
+						.initStrategyQuestionForm({
+							elem : $('.questionForm',
+									formElem)
+						});
+
+				$('.approveButton', formElem).click(
+						function(evt) {
+							evt.preventDefault();
+							row.remove();
+						});
+
+				$('.rejectButton', formElem).click(
+						function(evt) {
+							evt.preventDefault();
+							qa.priv.rejectQuestion(client
+									.reference(address),
+									secret);
+							row.remove();
+						});
+
+				onSuccess(questionForm);
+			});
+			
+			
 
 		};
 
@@ -228,7 +246,7 @@
 								&& typeof node.value === 'function'
 								&& node.value() === questionNode.url() + "&"
 										+ secret) {
-							alert("remove question");
+							
 							client.remove({
 								node : node,
 								from : questionsForReviewNode
@@ -236,7 +254,7 @@
 
 							client.commit({
 								onSuccess : function() {
-									alert("question removed!");
+									
 								}
 							});
 						}
