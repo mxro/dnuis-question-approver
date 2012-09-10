@@ -89,6 +89,7 @@
 		qa.priv = {};
 
 		qa.priv.loadQuestions = function() {
+			AJ.ui.showProgressBar();
 			client
 					.load({
 						node : questionsForReviewNode,
@@ -145,7 +146,9 @@
 																											function(
 																													questionData) {
 																													questionForm.loadQuestion(questionData);
+																													
 																													newRow.show();
+																													AJ.ui.hideProgressBar();
 																											});
 																							
 
@@ -197,25 +200,30 @@
 						}
 					});
 
-					// var html = client.dereference({
-					// ref : res.loadedNode
-					// }).value();
+					
 
 				}
 			});
 
 		};
 
-		qa.priv.removeQuestionFromQueue = function(node, secret) {
+		qa.priv.removeQuestionFromQueue = function(questionNode, secret) {
 			client
 			.select({
 				from : questionsForReviewNode,
 				onSuccess : function(sr) {
 					$.each(sr.values, function(index, node) {
-						if (node.value === node.url() + "&"+secret) {
+						if (node.value() === questionNode.url() + "&"+secret) {
+							alert("remove question");
 							client.remove({
 								node: node,
 								from: questionsForReviewNode
+							});
+							
+							client.commit({
+								onSuccess: function() {
+									alert("question removed!");
+								}
 							});
 						}
 					});
