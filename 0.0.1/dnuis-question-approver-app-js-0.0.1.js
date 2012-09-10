@@ -165,6 +165,7 @@
 																														.show();
 																												AJ.ui
 																														.hideProgressBar();
+																												AJ.ui.showStatus("Question completely rendered: "+address);
 																											});
 
 																						});
