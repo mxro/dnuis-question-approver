@@ -30,13 +30,15 @@
 		var questionFormTemplate = client
 				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approve-strategy-question-form-html-0.0.1");
 
+		var questionRepositorySecret = "thd3pb41jrke83i";
+
 		var qa = {};
 
 		qa.selectedRepo = null;
 		qa.selectedQuestionBag = null;
 
 		qa.approvalFormTermplate = null;
-		
+
 		qa.uploadQuestions = function(resolvedQuestionNodes) {
 			client.seed({
 				onSuccess : function(res) {
@@ -98,9 +100,9 @@
 						node : questionsForReviewNode,
 						secret : questionsForReviewSecret,
 						onSuccess : function(res) {
-							
+
 							AJ.ui.showStatus("Downloading submitted children.");
-							
+
 							client
 									.select({
 										from : res.loadedNode,
@@ -135,9 +137,11 @@
 																				elem)
 																				.append(
 																						newRow);
-																		
-																		AJ.ui.showStatus("Rendering question from for: "+address);
-																		
+
+																		AJ.ui
+																				.showStatus("Rendering question from for: "
+																						+ address);
+
 																		qa.priv
 																				.appendQuestionForm(
 																						$(
@@ -148,8 +152,10 @@
 																						secret,
 																						function(
 																								questionForm) {
-																							
-																							AJ.ui.showStatus("Loading question data for: "+address);
+
+																							AJ.ui
+																									.showStatus("Loading question data for: "
+																											+ address);
 																							sqdata
 																									.loadQuestion(
 																											client
@@ -157,15 +163,19 @@
 																											secret,
 																											function(
 																													questionData) {
-																												AJ.ui.showStatus("Question loaded successfully: "+address);
+																												AJ.ui
+																														.showStatus("Question loaded successfully: "
+																																+ address);
 																												questionForm
 																														.loadQuestion(questionData);
-																												
+
 																												newRow
 																														.show();
 																												AJ.ui
 																														.hideProgressBar();
-																												AJ.ui.showStatus("Question completely rendered: "+address);
+																												AJ.ui
+																														.showStatus("Question completely rendered: "
+																																+ address);
 																											});
 
 																						});
@@ -186,28 +196,26 @@
 				onSuccess(qa.approvalFormTermplate);
 				return;
 			}
-			
+
 			client.load({
 				node : questionFormTemplate,
 				onSuccess : function(res) {
 
-					AJ.odb.rendering().render(
-							{
-								node : res.loadedNode,
-								registry : renderers,
-								client : client,
-								onSuccess : function(html) {
-									qa.approvalFormTermplate = html;
-									onSuccess(html);
-								}
-							});
+					AJ.odb.rendering().render({
+						node : res.loadedNode,
+						registry : renderers,
+						client : client,
+						onSuccess : function(html) {
+							qa.approvalFormTermplate = html;
+							onSuccess(html);
+						}
+					});
 
 				}
 			});
-			
-			
+
 		};
-		
+
 		qa.priv.appendQuestionForm = function(toElem, row, address, secret,
 				onSuccess) {
 
@@ -217,31 +225,29 @@
 
 				formElem.html(html);
 
-				var questionForm = $
-						.initStrategyQuestionForm({
-							elem : $('.questionForm',
-									formElem)
-						});
+				var questionForm = $.initStrategyQuestionForm({
+					elem : $('.questionForm', formElem)
+				});
 
 				$('.approveButton', formElem).click(
 						function(evt) {
 							evt.preventDefault();
-							row.remove();
+							qa.priv.approveQuestion(client.reference(address),
+									secret, function() {
+										row.html("<i class='icon-okay'></i> Approved!");
+										row.show();
+									});
+							row.hide();
 						});
 
-				$('.rejectButton', formElem).click(
-						function(evt) {
-							evt.preventDefault();
-							qa.priv.rejectQuestion(client
-									.reference(address),
-									secret);
-							row.remove();
-						});
+				$('.rejectButton', formElem).click(function(evt) {
+					evt.preventDefault();
+					qa.priv.rejectQuestion(client.reference(address), secret);
+					row.remove();
+				});
 
 				onSuccess(questionForm);
 			});
-			
-			
 
 		};
 
@@ -254,7 +260,7 @@
 								&& typeof node.value === 'function'
 								&& node.value() === questionNode.url() + "&"
 										+ secret) {
-							
+
 							client.remove({
 								node : node,
 								from : questionsForReviewNode
@@ -262,7 +268,7 @@
 
 							client.commit({
 								onSuccess : function() {
-									
+
 								}
 							});
 						}
@@ -271,6 +277,32 @@
 
 			});
 		}
+
+		qa.priv.approveQuestion = function(node, secret, onSuccess) {
+			qa.updateDestination();
+
+			client.load({
+				node : client.reference(qa.selectedQuestionBag),
+				secret : questionRepositorySecret,
+				onSuccess : function(res) {
+					client.append({
+						node : node,
+						to : res.loadedNode
+					});
+
+					client.commit({
+						onSuccess : function() {
+							onSuccess();
+						}
+					});
+				},
+				onFailure : function(ex) {
+					AJ.ui.notify("Unexpected exception while loading node: "
+							+ ex, "alert-error");
+				}
+			});
+
+		};
 
 		qa.priv.rejectQuestion = function(node, secret) {
 			qa.priv.removeQuestionFromQueue(node, secret);
