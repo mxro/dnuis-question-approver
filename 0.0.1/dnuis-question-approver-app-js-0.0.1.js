@@ -110,81 +110,7 @@
 										from : res.loadedNode,
 										onSuccess : function(sr) {
 
-											var num = 1;
-											$
-													.each(
-															sr.values,
-															function(index,
-																	value) {
-																if (value.value) {
-
-																	var split = value
-																			.value()
-																			.split(
-																					"&");
-
-																	if (split[0]
-																			&& split[1]) {
-																		var address = split[0];
-																		var secret = split[1];
-
-																		var newRow = $("<tr class='hide'><td>"
-																				+ num
-																				+ "</td><td class='approvalForm'></td></tr>");
-
-																		num = num + 1;
-
-																		$(
-																				'.incomingQuestions',
-																				elem)
-																				.append(
-																						newRow);
-
-																		AJ.ui
-																				.showStatus("Rendering question from for: "
-																						+ address);
-
-																		qa.priv
-																				.appendQuestionForm(
-																						$(
-																								'.approvalForm',
-																								newRow),
-																						newRow,
-																						address,
-																						secret,
-																						function(
-																								questionForm) {
-
-																							AJ.ui
-																									.showStatus("Loading question data for: "
-																											+ address);
-																							sqdata
-																									.loadQuestion(
-																											client
-																													.reference(address),
-																											secret,
-																											function(
-																													questionData) {
-																												AJ.ui
-																														.showStatus("Question loaded successfully: "
-																																+ address);
-																												questionForm
-																														.loadQuestion(questionData);
-
-																												newRow
-																														.show();
-																												AJ.ui
-																														.hideProgressBar();
-																												AJ.ui
-																														.showStatus("Question completely rendered: "
-																																+ address);
-																											});
-
-																						});
-
-																	}
-																}
-															});
+											qa.priv.renderQuestions(o, sr.values);
 
 										}
 									});
@@ -193,6 +119,87 @@
 					});
 		};
 
+		qa.priv.renderQuestions = function(idx, questions) {
+			
+			if (idx >= questions.length) {
+				return;
+			}
+			
+			var value=questions[idx];
+			var num=idx+1;
+			
+			if (value.value) {
+
+				var split = value
+						.value()
+						.split(
+								"&");
+
+				if (split[0]
+						&& split[1]) {
+					var address = split[0];
+					var secret = split[1];
+
+					var newRow = $("<tr class='hide'><td>"
+							+ num
+							+ "</td><td class='approvalForm'></td></tr>");
+
+					num = num + 1;
+
+					$(
+							'.incomingQuestions',
+							elem)
+							.append(
+									newRow);
+
+					AJ.ui
+							.showStatus("Rendering question from for: "
+									+ address);
+
+					qa.priv
+							.appendQuestionForm(
+									$(
+											'.approvalForm',
+											newRow),
+									newRow,
+									address,
+									secret,
+									function(
+											questionForm) {
+
+										AJ.ui
+												.showStatus("Loading question data for: "
+														+ address);
+										sqdata
+												.loadQuestion(
+														client
+																.reference(address),
+														secret,
+														function(
+																questionData) {
+															AJ.ui
+																	.showStatus("Question loaded successfully: "
+																			+ address);
+															questionForm
+																	.loadQuestion(questionData);
+
+															newRow
+																	.show();
+															AJ.ui
+																	.hideProgressBar();
+															AJ.ui
+																	.showStatus("Question completely rendered: "
+																			+ address);
+															qa.priv.renderQuestions(idx+1, questions);
+														});
+
+									});
+
+				}
+			}
+			
+		}
+		
 		qa.priv.getApprovalFormTemplate = function(onSuccess) {
 			if (qa.approvalFormTermplate) {
 				onSuccess(qa.approvalFormTermplate);
