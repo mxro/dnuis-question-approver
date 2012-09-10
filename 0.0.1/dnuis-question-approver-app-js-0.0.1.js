@@ -86,12 +86,12 @@
 				var qbag = $('.questionBagSelect', elem).val();
 				qa.selectedQuestionBag = qbag;
 				$('.questionBagLabel').attr('href', qbag);
-				$('.questionBagLabel').html(repo);
+				$('.questionBagLabel').html(qbag);
 			};
 			
 			qa.priv = {};
 			
-			qa.priv.getQuestions = function() {
+			qa.priv.loadQuestions = function() {
 				client.load({
 					node: questionsForReviewNode,
 					secret: questionsForReviewSecret,
