@@ -30,7 +30,7 @@
 		var questionFormTemplate = client
 				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approve-strategy-question-form-html-0.0.1");
 
-		var questionRepositorySecret = "qt2e21opqdljhxb";
+		var questionRepositorySecret = "g60492up28xfnr7";
 
 		var qa = {};
 
