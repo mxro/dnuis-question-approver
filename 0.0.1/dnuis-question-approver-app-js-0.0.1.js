@@ -93,7 +93,7 @@
 		qa.priv = {};
 
 		qa.priv.loadQuestions = function() {
-			
+
 			AJ.ui.showStatus("Loading submitted questions node.");
 			client.load({
 				node : questionsForReviewNode,
@@ -122,7 +122,7 @@
 			}
 
 			var value = questions[idx];
-			var num = idx + 1;
+			//var num = idx + 1;
 
 			if (!value.value) {
 				qa.priv.renderQuestions(idx + 1, num, questions);
@@ -130,7 +130,7 @@
 			}
 
 			var split = value.value().split("&");
-			
+
 			AJ.ui.showProgressBar();
 			if (split[0] && split[1]) {
 				var address = split[0];
@@ -139,7 +139,7 @@
 				var newRow = $("<tr class='hide'><td>" + num
 						+ "</td><td class='approvalForm'></td></tr>");
 
-				num = num + 1;
+				//num = num + 1;
 
 				$('.incomingQuestions', elem).append(newRow);
 
@@ -175,7 +175,7 @@
 														qa.priv
 																.renderQuestions(
 																		idx + 1,
-																		num+1,
+																		num + 1,
 																		questions);
 													});
 
@@ -240,10 +240,11 @@
 													.approveQuestion(
 															client
 																	.reference(address),
+															questionForm,
 															secret,
 															function() {
 																row
-																		.html("<div style='margin-left: 35px;'><i class='icon-okay'></i> Approved!</div>");
+																		.html("<div style='margin-left: 35px;'><i class='icon-ok'></i> Question Approved!</div>");
 																row.show();
 															});
 											row.hide();
@@ -289,7 +290,8 @@
 			});
 		}
 
-		qa.priv.approveQuestion = function(questionNode, secret, onSuccess) {
+		qa.priv.approveQuestion = function(questionNode, questionForm, secret,
+				onSuccess) {
 			qa.updateDestination();
 
 			if (!qa.selectedQuestionBag) {
@@ -313,8 +315,15 @@
 						node : questionNode,
 						to : res.loadedNode,
 						onSuccess : function(res) {
-							qa.priv.removeQuestionFromQueue(questionNode, secret);
-							onSuccess();
+
+							sqdata.updateQuestion(questionNode, secret,
+									questionForm.getData(), function() {
+										qa.priv.removeQuestionFromQueue(
+												questionNode, secret);
+
+										onSuccess();
+									});
+
 						}
 					});
 
