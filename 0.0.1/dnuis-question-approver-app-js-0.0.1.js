@@ -167,16 +167,16 @@
 
 								for ( var i = 0; i <= children.length - 1; i++) {
 
-									if (children[i].uri() === aStrategyQuandrantQuestion
-											.uri()) {
+									if (children[i] === aStrategyQuandrantQuestion
+											.url()) {
 										qa.priv
 												.appendStrategyQuandrantQuestion(
 														idx, num, questions,
 														newRow, address, secret);
 									}
 
-									if (children[i].uri() === aPorters5Question
-											.uri()) {
+									if (children[i] === aPorters5Question
+											.url()) {
 										qa.priv.appendPorters5Question(idx,
 												num, questions, newRow,
 												address, secret);
