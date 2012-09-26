@@ -35,7 +35,7 @@
 		var aStrategyQuandrantQuestion = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Strategy_Quadrant_Questi");
 		var aPorters5Question = client
-				.refernece("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Porter_s_5_Question");
+				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Porter_s_5_Question");
 		var porters5FormTemplate = client
 				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/porter5-form-html-0.0.1");
 
