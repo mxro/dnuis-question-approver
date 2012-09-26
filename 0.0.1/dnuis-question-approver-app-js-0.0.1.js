@@ -157,7 +157,7 @@
 
 				client
 						.load({
-							node : address,
+							node : client.reference(address),
 							secret : secret,
 							onSuccess : function(lr) {
 
@@ -167,27 +167,31 @@
 
 								for ( var i = 0; i <= children.length - 1; i++) {
 
-									if (children[i] === aStrategyQuandrantQuestion
+									if (children[i].url() === aStrategyQuandrantQuestion
 											.url()) {
 										qa.priv
 												.appendStrategyQuandrantQuestion(
 														idx, num, questions,
 														newRow, address, secret);
+										return;
 									}
 
-									if (children[i] === aPorters5Question
+									if (children[i].url() === aPorters5Question
 											.url()) {
+										
 										qa.priv.appendPorters5Question(idx,
 												num, questions, newRow,
 												address, secret);
+										return;
 									}
 
 								}
 
-								// newRow.html("<div style='margin-left:
-								// 35px;'><i class='icon-ok'></i> Question
-								// Approved!</div>");
-
+								qa.priv.renderQuestions(
+										idx + 1, num + 1,
+										questions);
+								
+								
 							}
 						});
 
