@@ -30,14 +30,18 @@
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag");
 		var aQuestionBagRepository = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag_Repository");
-		var questionFormTemplate = client
-				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approve-strategy-question-form-html-0.0.1");
+		
 		var aStrategyQuandrantQuestion = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Strategy_Quadrant_Questi");
 		var aPorters5Question = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Porter_s_5_Question");
+		
+		
+		
+		var questionFormTemplate = client
+		.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approve-strategy-question-form-html-0.0.1");
 		var porters5FormTemplate = client
-				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/porter5-form-html-0.0.1");
+				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approver-porter5-form-html-0.0.1");
 
 		var questionRepositorySecret = "g60492up28xfnr7";
 
@@ -221,6 +225,8 @@
 													AJ.ui
 															.showStatus("Question loaded successfully: "
 																	+ address);
+													//alert("got data: "+JSON.stringify(questionData));
+													
 													porters5Form
 															.loadQuestion(questionData);
 
@@ -245,7 +251,7 @@
 
 						formElem.html(html);
 
-						var questionForm = $.initStrategyQuestionForm({
+						var questionForm = $.initPorter5QuestionForm({
 							elem : $('.questionForm', formElem)
 						});
 
@@ -280,19 +286,7 @@
 					});
 		};
 
-		qa.priv.getPorters5FormTemplate = function(onSuccess) {
-			if (qa.porters5FormTeamplte) {
-				onSuccess(qa.porters5FormTeamplte);
-				return;
-			}
-
-			qa.priv.getFormTemplate(porters5FormTemplate, function(html) {
-				qa.porters5FormTeamplte = html;
-			});
-			
-			onSuccess(html);
-
-		};
+		
 
 		qa.priv.appendStrategyQuandrantQuestion = function(idx, num, questions,
 				newRow, address, secret) {
@@ -333,6 +327,38 @@
 
 		};
 
+		
+
+		qa.priv.getPorters5FormTemplate = function(onSuccess) {
+			if (qa.porters5FormTeamplte) {
+				onSuccess(qa.porters5FormTeamplte);
+				return;
+			}
+
+			qa.priv.getFormTemplate(porters5FormTemplate, function(html) {
+				qa.porters5FormTeamplte = html;
+				onSuccess(html);
+			});
+			
+			
+
+		};
+		
+		qa.priv.getApprovalFormTemplate = function(onSuccess) {
+			if (qa.approvalFormTermplate) {
+				onSuccess(qa.approvalFormTermplate);
+				return;
+			}
+
+			qa.priv.getFormTemplate(questionFormTemplate, function(html) {
+				qa.approvalFormTermplate = html;
+				onSuccess(html);
+			});
+			
+			
+
+		};
+
 		qa.priv.getFormTemplate = function(templateNode, onSuccess) {
 
 			client.load({
@@ -353,21 +379,7 @@
 			});
 
 		};
-
-		qa.priv.getApprovalFormTemplate = function(onSuccess) {
-			if (qa.approvalFormTermplate) {
-				onSuccess(qa.approvalFormTermplate);
-				return;
-			}
-
-			qa.priv.getFormTemplate(questionFormTemplate, function(html) {
-				qa.approvalFormTermplate = html;
-			});
-			
-			onSuccess(html);
-
-		};
-
+		
 		qa.priv.appendQuandrantQuestionForm = function(toElem, row, address,
 				secret, onSuccess) {
 
