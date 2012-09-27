@@ -201,6 +201,7 @@
 
 		qa.priv.appendPorters5Question = function(idx, num, questions, newRow,
 				address, secret) {
+			AJ.ui.showStatus("Rendering Porter's five forces question for: " + address);
 			qa.priv
 					.appendPorters5Form(
 							$('.approvalForm', newRow),
@@ -236,7 +237,7 @@
 							});
 		};
 
-		qa.priv.appendPorters5Form = function(toElem, row, address, secret) {
+		qa.priv.appendPorters5Form = function(toElem, row, address, secret, onSuccess) {
 			qa.priv
 					.getPorters5FormTemplate(function(html) {
 						var formElem = $("<div></div>");
@@ -288,6 +289,8 @@
 			qa.priv.getFormTemplate(porters5FormTemplate, function(html) {
 				qa.porters5FormTeamplte = html;
 			});
+			
+			onSuccess(html);
 
 		};
 
@@ -360,6 +363,8 @@
 			qa.priv.getFormTemplate(questionFormTemplate, function(html) {
 				qa.approvalFormTermplate = html;
 			});
+			
+			onSuccess(html);
 
 		};
 
