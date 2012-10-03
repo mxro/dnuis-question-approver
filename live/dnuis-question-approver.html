@@ -287,8 +287,15 @@ html,body {
 		
 	}
 
+	var wasLoaded = false;
+	
 	function AJ_engineLoaded(aj) {
 
+		if (wasLoaded === true) {
+			return;
+		}
+		wasLoaded = true;
+		
 		AJ.statusBar = $.ajInitStatusBar($("#ajstatusbar"), aj);
 		AJ.notificationBar = $.ajInitNotificationBar($("#ajnotificationbar"), aj);
 		AJ.navbar = $.ajInitNavbar($("#ajnavbar"), aj);
