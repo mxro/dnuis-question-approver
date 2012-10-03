@@ -19,8 +19,6 @@
 			client : client
 		});
 
-		
-		
 		var renderers = AJ.odb.rendering().createCompleteRendererRegistry(
 				function(input) {
 					return input;
@@ -58,7 +56,7 @@
 		qa.approvalFormTermplate = null;
 		qa.porters5FormTeamplte = null;
 		qa.valueChainFormTemplate = null;
-		
+
 		qa.createRepositoryAndBag = function(resolvedQuestionNodes) {
 			client.seed({
 				onSuccess : function(res) {
@@ -194,11 +192,14 @@
 												address, secret);
 										return;
 									}
-									
-									if (children[i].url() === aValueChainQuestion.url()) {
-										qa.priv.appendValueChainQuestion(idx, num, questions, newRow, address, secret);
+
+									if (children[i].url() === aValueChainQuestion
+											.url()) {
+										qa.priv.appendValueChainQuestion(idx,
+												num, questions, newRow,
+												address, secret);
 										return;
-									} 
+									}
 
 								}
 
@@ -212,12 +213,11 @@
 
 		}
 
-		
-		// -------- PORTER 5
+		// -------- VALUE CHAIN
 
-		qa.priv.appendValueChainQuestion = function(idx, num, questions, newRow,
-				address, secret) {
-			AJ.ui.showStatus("Rendering Porter's five forces question for: "
+		qa.priv.appendValueChainQuestion = function(idx, num, questions,
+				newRow, address, secret) {
+			AJ.ui.showStatus("Rendering Value Chain question for: "
 					+ address);
 			qa.priv
 					.appendValueChainForm(
@@ -229,21 +229,22 @@
 
 								AJ.ui.showStatus("Loading question data for: "
 										+ address);
-								
-								var session =  Nextweb.createSession();
+
+								var session = Nextweb.createSession();
 								var valueChainData = $.initValueChainData({
 									session : session
 								});
-								
+
 								valueChainData
 										.loadQuestion(
 												session.node(address),
 												secret,
 												function(questionData) {
-													
-													session.close().get(function(success) {
-														
-													});
+
+													session.close().get(
+															function(success) {
+
+															});
 													AJ.ui
 															.showStatus("Question loaded successfully: "
 																	+ address);
@@ -281,13 +282,13 @@
 		qa.priv.appendValueChainForm = function(toElem, row, address, secret,
 				onSuccess) {
 			qa.priv
-					.getPorters5FormTemplate(function(html) {
+					.getValueChainFormTemplate(function(html) {
 						var formElem = $("<div></div>");
 						toElem.append(formElem);
 
 						formElem.html(html);
 
-						var questionForm = $.initPorter5QuestionForm({
+						var questionForm = $.initValueChainQuestionForm({
 							elem : $('.questionForm', formElem)
 						});
 
@@ -297,7 +298,7 @@
 											evt.preventDefault();
 											qa.priv
 													.approveQuestion(
-															"porter5",
+															"valueChain",
 															client
 																	.reference(address),
 															questionForm,
@@ -321,8 +322,7 @@
 						onSuccess(questionForm);
 					});
 		};
-		
-		
+
 		// -------- PORTER 5
 
 		qa.priv.appendPorters5Question = function(idx, num, questions, newRow,
@@ -615,6 +615,7 @@
 
 											onSuccess();
 										});
+								return;
 							}
 
 							if (type === "porter5") {
@@ -626,8 +627,34 @@
 
 											onSuccess();
 										});
+								return;
 							}
 
+							if (type === "valueChain") {
+								var session = Nextweb.createSession();
+
+								var valueChainData = $.initValueChainData({
+									session : session
+								});
+
+								valueChainData.updateQuestion(questionNode,
+										secret, questionForm.getData(),
+										function() {
+
+											session.close().get(
+													function(success) {
+
+													});
+											qa.priv.removeQuestionFromQueue(
+													questionNode, secret);
+
+											onSuccess();
+										});
+
+								return;
+							}
+
+							throw "Unknown question type: " + type;
 						}
 					});
 
