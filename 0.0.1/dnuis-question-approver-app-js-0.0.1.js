@@ -276,7 +276,7 @@
 		};
 
 		qa.priv.getValueChainFormTemplate = function(onSuccess) {
-			qa.valueChainFormTemplate = "nothing";
+			//qa.valueChainFormTemplate = "nothing";
 			if (qa.valueChainFormTemplate) {
 				onSuccess(qa.valueChainFormTemplate);
 				return;
