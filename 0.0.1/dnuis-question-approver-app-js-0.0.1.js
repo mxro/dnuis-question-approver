@@ -19,6 +19,8 @@
 			client : client
 		});
 
+		
+		
 		var renderers = AJ.odb.rendering().createCompleteRendererRegistry(
 				function(input) {
 					return input;
@@ -30,18 +32,21 @@
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag");
 		var aQuestionBagRepository = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Question_Bag_Repository");
-		
+
 		var aStrategyQuandrantQuestion = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Strategy_Quadrant_Questi");
 		var aPorters5Question = client
 				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Porter_s_5_Question");
-		
-		
-		
+		var aValueChainQuestion = client
+				.reference("http://slicnet.com/mxrogm/mxrogm/apps/nodejump/docs/8/n/Types/Value_Chain_Question");
+
 		var questionFormTemplate = client
-		.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approve-strategy-question-form-html-0.0.1");
+				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approve-strategy-question-form-html-0.0.1");
 		var porters5FormTemplate = client
 				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approver-porter5-form-html-0.0.1");
+
+		var valueChainFormTemplate = client
+				.reference("https://u1.linnk.it/qc8sbw/usr/apps/textsync/docs/approver-value-chain-form-html-0.0.1");
 
 		var questionRepositorySecret = "g60492up28xfnr7";
 
@@ -52,7 +57,8 @@
 
 		qa.approvalFormTermplate = null;
 		qa.porters5FormTeamplte = null;
-
+		qa.valueChainFormTemplate = null;
+		
 		qa.createRepositoryAndBag = function(resolvedQuestionNodes) {
 			client.seed({
 				onSuccess : function(res) {
@@ -182,20 +188,23 @@
 
 									if (children[i].url() === aPorters5Question
 											.url()) {
-										
+
 										qa.priv.appendPorters5Question(idx,
 												num, questions, newRow,
 												address, secret);
 										return;
 									}
+									
+									if (children[i].url() === aValueChainQuestion.url()) {
+										qa.priv.appendValueChainQuestion(idx, num, questions, newRow, address, secret);
+										return;
+									} 
 
 								}
 
-								qa.priv.renderQuestions(
-										idx + 1, num + 1,
+								qa.priv.renderQuestions(idx + 1, num + 1,
 										questions);
-								
-								
+
 							}
 						});
 
@@ -203,9 +212,123 @@
 
 		}
 
+		
+		// -------- PORTER 5
+
+		qa.priv.appendValueChainQuestion = function(idx, num, questions, newRow,
+				address, secret) {
+			AJ.ui.showStatus("Rendering Porter's five forces question for: "
+					+ address);
+			qa.priv
+					.appendValueChainForm(
+							$('.approvalForm', newRow),
+							newRow,
+							address,
+							secret,
+							function(valueChainForm) {
+
+								AJ.ui.showStatus("Loading question data for: "
+										+ address);
+								
+								var session =  Nextweb.createSession();
+								var valueChainData = $.initValueChainData({
+									session : session
+								});
+								
+								valueChainData
+										.loadQuestion(
+												session.node(address),
+												secret,
+												function(questionData) {
+													
+													session.close().get(function(success) {
+														
+													});
+													AJ.ui
+															.showStatus("Question loaded successfully: "
+																	+ address);
+													//alert("got data: "+JSON.stringify(questionData));
+
+													valueChainForm
+															.loadQuestion(questionData);
+
+													newRow.show();
+													AJ.ui.hideProgressBar();
+													AJ.ui
+															.showStatus("Question completely rendered: "
+																	+ address);
+													qa.priv.renderQuestions(
+															idx + 1, num + 1,
+															questions);
+												});
+
+							});
+		};
+
+		qa.priv.getValueChainFormTemplate = function(onSuccess) {
+			if (qa.valueChainFormTemplate) {
+				onSuccess(qa.valueChainFormTemplate);
+				return;
+			}
+
+			qa.priv.getFormTemplate(valueChainFormTemplate, function(html) {
+				qa.valueChainFormTemplate = html;
+				onSuccess(html);
+			});
+
+		};
+
+		qa.priv.appendValueChainForm = function(toElem, row, address, secret,
+				onSuccess) {
+			qa.priv
+					.getPorters5FormTemplate(function(html) {
+						var formElem = $("<div></div>");
+						toElem.append(formElem);
+
+						formElem.html(html);
+
+						var questionForm = $.initPorter5QuestionForm({
+							elem : $('.questionForm', formElem)
+						});
+
+						$('.approveButton', formElem)
+								.click(
+										function(evt) {
+											evt.preventDefault();
+											qa.priv
+													.approveQuestion(
+															"porter5",
+															client
+																	.reference(address),
+															questionForm,
+															secret,
+															function() {
+																row
+																		.html("<div style='margin-left: 35px;'><i class='icon-ok'></i> Question Approved!</div>");
+																row.show();
+															});
+											row.hide();
+										});
+
+						$('.rejectButton', formElem).click(
+								function(evt) {
+									evt.preventDefault();
+									qa.priv.rejectQuestion(client
+											.reference(address), secret);
+									row.remove();
+								});
+
+						onSuccess(questionForm);
+					});
+		};
+		
+		
+		// -------- PORTER 5
+
 		qa.priv.appendPorters5Question = function(idx, num, questions, newRow,
 				address, secret) {
-			AJ.ui.showStatus("Rendering Porter's five forces question for: " + address);
+			AJ.ui.showStatus("Rendering Porter's five forces question for: "
+					+ address);
 			qa.priv
 					.appendPorters5Form(
 							$('.approvalForm', newRow),
@@ -226,7 +349,7 @@
 															.showStatus("Question loaded successfully: "
 																	+ address);
 													//alert("got data: "+JSON.stringify(questionData));
-													
+
 													porters5Form
 															.loadQuestion(questionData);
 
@@ -243,7 +366,21 @@
 							});
 		};
 
-		qa.priv.appendPorters5Form = function(toElem, row, address, secret, onSuccess) {
+		qa.priv.getPorters5FormTemplate = function(onSuccess) {
+			if (qa.porters5FormTeamplte) {
+				onSuccess(qa.porters5FormTeamplte);
+				return;
+			}
+
+			qa.priv.getFormTemplate(porters5FormTemplate, function(html) {
+				qa.porters5FormTeamplte = html;
+				onSuccess(html);
+			});
+
+		};
+
+		qa.priv.appendPorters5Form = function(toElem, row, address, secret,
+				onSuccess) {
 			qa.priv
 					.getPorters5FormTemplate(function(html) {
 						var formElem = $("<div></div>");
@@ -286,7 +423,7 @@
 					});
 		};
 
-		
+		// ----------- STRATEGY QUANDRANT
 
 		qa.priv.appendStrategyQuandrantQuestion = function(idx, num, questions,
 				newRow, address, secret) {
@@ -327,23 +464,6 @@
 
 		};
 
-		
-
-		qa.priv.getPorters5FormTemplate = function(onSuccess) {
-			if (qa.porters5FormTeamplte) {
-				onSuccess(qa.porters5FormTeamplte);
-				return;
-			}
-
-			qa.priv.getFormTemplate(porters5FormTemplate, function(html) {
-				qa.porters5FormTeamplte = html;
-				onSuccess(html);
-			});
-			
-			
-
-		};
-		
 		qa.priv.getApprovalFormTemplate = function(onSuccess) {
 			if (qa.approvalFormTermplate) {
 				onSuccess(qa.approvalFormTermplate);
@@ -354,32 +474,9 @@
 				qa.approvalFormTermplate = html;
 				onSuccess(html);
 			});
-			
-			
 
 		};
 
-		qa.priv.getFormTemplate = function(templateNode, onSuccess) {
-
-			client.load({
-				node : templateNode,
-				onSuccess : function(res) {
-
-					AJ.odb.rendering().render({
-						node : res.loadedNode,
-						registry : renderers,
-						client : client,
-						onSuccess : function(html) {
-
-							onSuccess(html);
-						}
-					});
-
-				}
-			});
-
-		};
-		
 		qa.priv.appendQuandrantQuestionForm = function(toElem, row, address,
 				secret, onSuccess) {
 
@@ -431,6 +528,29 @@
 
 						onSuccess(questionForm);
 					});
+
+		};
+
+		// ---------- COMMON
+
+		qa.priv.getFormTemplate = function(templateNode, onSuccess) {
+
+			client.load({
+				node : templateNode,
+				onSuccess : function(res) {
+
+					AJ.odb.rendering().render({
+						node : res.loadedNode,
+						registry : renderers,
+						client : client,
+						onSuccess : function(html) {
+
+							onSuccess(html);
+						}
+					});
+
+				}
+			});
 
 		};
 
