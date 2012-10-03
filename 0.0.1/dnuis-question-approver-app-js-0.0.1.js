@@ -113,11 +113,12 @@
 		qa.priv.loadQuestions = function() {
 
 			AJ.ui.showStatus("Loading submitted questions node.");
+			
 			client.load({
 				node : questionsForReviewNode,
 				secret : questionsForReviewSecret,
 				onSuccess : function(res) {
-
+					
 					AJ.ui.showStatus("Downloading submitted children.");
 
 					client.select({
@@ -129,6 +130,9 @@
 						}
 					});
 
+				},
+				onFailure: function(ex) {
+					AJ.ui.notify("Unexpected error while loading question node: "+ex, "alert-error");
 				}
 			});
 		};
@@ -227,9 +231,14 @@
 							secret,
 							function(valueChainForm) {
 
-								AJ.ui.showStatus("Loading question data for: "
+								AJ.ui.showStatus("Loading question data for Value Chain questions: "
 										+ address);
 
+								//qa.priv.renderQuestions(
+								//		idx + 1, num + 1,
+								//		questions);
+								//return;
+								
 								var session = Nextweb.createSession();
 								var valueChainData = $.initValueChainData({
 									session : session
@@ -267,6 +276,7 @@
 		};
 
 		qa.priv.getValueChainFormTemplate = function(onSuccess) {
+			qa.valueChainFormTemplate = "nothing";
 			if (qa.valueChainFormTemplate) {
 				onSuccess(qa.valueChainFormTemplate);
 				return;
@@ -534,7 +544,7 @@
 		// ---------- COMMON
 
 		qa.priv.getFormTemplate = function(templateNode, onSuccess) {
-
+			
 			client.load({
 				node : templateNode,
 				onSuccess : function(res) {
