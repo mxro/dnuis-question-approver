@@ -113,12 +113,12 @@
 		qa.priv.loadQuestions = function() {
 
 			AJ.ui.showStatus("Loading submitted questions node.");
-			
+
 			client.load({
 				node : questionsForReviewNode,
 				secret : questionsForReviewSecret,
 				onSuccess : function(res) {
-					
+
 					AJ.ui.showStatus("Downloading submitted children.");
 
 					client.select({
@@ -131,8 +131,10 @@
 					});
 
 				},
-				onFailure: function(ex) {
-					AJ.ui.notify("Unexpected error while loading question node: "+ex, "alert-error");
+				onFailure : function(ex) {
+					AJ.ui.notify(
+							"Unexpected error while loading question node: "
+									+ ex, "alert-error");
 				}
 			});
 		};
@@ -221,8 +223,7 @@
 
 		qa.priv.appendValueChainQuestion = function(idx, num, questions,
 				newRow, address, secret) {
-			AJ.ui.showStatus("Rendering Value Chain question for: "
-					+ address);
+			AJ.ui.showStatus("Rendering Value Chain question for: " + address);
 			qa.priv
 					.appendValueChainForm(
 							$('.approvalForm', newRow),
@@ -231,14 +232,15 @@
 							secret,
 							function(valueChainForm) {
 
-								AJ.ui.showStatus("Loading question data for Value Chain questions: "
-										+ address);
+								AJ.ui
+										.showStatus("Loading question data for Value Chain questions: "
+												+ address);
 
-								//qa.priv.renderQuestions(
-								//		idx + 1, num + 1,
-								//		questions);
-								//return;
-								
+								// qa.priv.renderQuestions(
+								// idx + 1, num + 1,
+								// questions);
+								// return;
+
 								var session = Nextweb.createSession();
 								var valueChainData = $.initValueChainData({
 									session : session
@@ -257,7 +259,8 @@
 													AJ.ui
 															.showStatus("Question loaded successfully: "
 																	+ address);
-													//alert("got data: "+JSON.stringify(questionData));
+													// alert("got data:
+													// "+JSON.stringify(questionData));
 
 													valueChainForm
 															.loadQuestion(questionData);
@@ -276,7 +279,7 @@
 		};
 
 		qa.priv.getValueChainFormTemplate = function(onSuccess) {
-			//qa.valueChainFormTemplate = "nothing";
+			// qa.valueChainFormTemplate = "nothing";
 			if (qa.valueChainFormTemplate) {
 				onSuccess(qa.valueChainFormTemplate);
 				return;
@@ -358,7 +361,8 @@
 													AJ.ui
 															.showStatus("Question loaded successfully: "
 																	+ address);
-													//alert("got data: "+JSON.stringify(questionData));
+													// alert("got data:
+													// "+JSON.stringify(questionData));
 
 													porters5Form
 															.loadQuestion(questionData);
@@ -544,7 +548,7 @@
 		// ---------- COMMON
 
 		qa.priv.getFormTemplate = function(templateNode, onSuccess) {
-			
+
 			client.load({
 				node : templateNode,
 				onSuccess : function(res) {
@@ -603,82 +607,114 @@
 				throw "Question node must be defined!";
 			}
 
-			client.load({
-				node : client.reference(qa.selectedQuestionBag),
-				secret : questionRepositorySecret,
-				onSuccess : function(res) {
-
-					if (!res.loadedNode) {
-						throw "Loaded node not defined.";
-					}
-
-					client.appendSafe({
-						node : questionNode,
-						to : res.loadedNode,
+			client
+					.load({
+						node : client.reference(qa.selectedQuestionBag),
+						secret : questionRepositorySecret,
 						onSuccess : function(res) {
 
-							if (type === "quandrant") {
-								sqdata.updateQuestion(questionNode, secret,
-										questionForm.getData(), function() {
-											qa.priv.removeQuestionFromQueue(
-													questionNode, secret);
-
-											onSuccess();
-										});
-								return;
+							if (!res.loadedNode) {
+								throw "Loaded node not defined.";
 							}
 
-							if (type === "porter5") {
-								porter5data.updateQuestion(questionNode,
-										secret, questionForm.getData(),
-										function() {
-											qa.priv.removeQuestionFromQueue(
-													questionNode, secret);
+							client
+									.appendSafe({
+										node : questionNode,
+										to : res.loadedNode,
+										onSuccess : function(res) {
 
-											onSuccess();
-										});
-								return;
-							}
+											if (type === "quandrant") {
+												sqdata
+														.updateQuestion(
+																questionNode,
+																secret,
+																questionForm
+																		.getData(),
+																function() {
+																	qa.priv
+																			.removeQuestionFromQueue(
+																					questionNode,
+																					secret);
 
-							if (type === "valueChain") {
-								var session = Nextweb.createSession();
+																	onSuccess();
+																});
+												return;
+											}
 
-								var valueChainData = $.initValueChainData({
-									session : session
-								});
+											if (type === "porter5") {
+												porter5data
+														.updateQuestion(
+																questionNode,
+																secret,
+																questionForm
+																		.getData(),
+																function() {
+																	qa.priv
+																			.removeQuestionFromQueue(
+																					questionNode,
+																					secret);
 
-								valueChainData.updateQuestion(questionNode,
-										secret, questionForm.getData(),
-										function() {
+																	onSuccess();
+																});
+												return;
+											}
 
-											session.close().get(
-													function(success) {
+											if (type === "valueChain") {
+												var session = Nextweb
+														.createSession();
 
-													});
-											qa.priv.removeQuestionFromQueue(
-													questionNode, secret);
+												var valueChainData = $
+														.initValueChainData({
+															session : session
+														});
 
-											onSuccess();
-										});
+												valueChainData
+														.updateQuestion(
+																session
+																		.node(
+																				questionNode
+																						.url(),
+																				secret),
+																secret,
+																questionForm
+																		.getData(),
+																function() {
 
-								return;
-							}
+																	session
+																			.close()
+																			.get(
+																					function(
+																							success) {
+																						qa.priv
+																								.removeQuestionFromQueue(
+																										questionNode,
+																										secret);
 
-							throw "Unknown question type: " + type;
+																						onSuccess();
+																					});
+
+																});
+
+												return;
+											}
+
+											throw "Unknown question type: "
+													+ type;
+										}
+									});
+
+							client.commit({
+								onSuccess : function() {
+
+								}
+							});
+						},
+						onFailure : function(ex) {
+							AJ.ui.notify(
+									"Unexpected exception while loading node: "
+											+ ex, "alert-error");
 						}
 					});
-
-					client.commit({
-						onSuccess : function() {
-
-						}
-					});
-				},
-				onFailure : function(ex) {
-					AJ.ui.notify("Unexpected exception while loading node: "
-							+ ex, "alert-error");
-				}
-			});
 
 		};
 
